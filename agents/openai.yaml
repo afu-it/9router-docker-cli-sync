@@ -1,0 +1,4 @@
+interface:
+  display_name: "9Router Docker CLI Sync"
+  short_description: "Fix Docker CLI detection with symlinks."
+  default_prompt: "Use $9router-docker-cli-sync to make 9Router Docker detect and edit host CLI tool configs."
