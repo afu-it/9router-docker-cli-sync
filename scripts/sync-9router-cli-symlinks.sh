@@ -8,11 +8,17 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! docker inspect "$container" >/dev/null 2>&1; then
+inspect_output="$(docker inspect "$container" 2>&1)" || {
+  if printf '%s\n' "$inspect_output" | grep -qiE 'permission denied|connect.*docker|docker daemon'; then
+    echo "docker permission denied." >&2
+    echo "Run this script with sudo, or fix Docker socket permissions:" >&2
+    echo "  sudo bash $0 $container" >&2
+    exit 1
+  fi
   echo "container not found: $container" >&2
   echo 'Start 9Router with: -v "$HOME:/home/user"' >&2
   exit 1
-fi
+}
 
 # Confirm host home mount is visible from inside the container.
 if ! docker exec "$container" sh -lc 'test -d /home/user'; then

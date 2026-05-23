@@ -18,9 +18,10 @@ Make 9Router Docker read and write the host CLI configs, not copied container-on
 1. Confirm 9Router container exists and Docker access works.
 2. Ensure the container was started with host home mounted:
    `-v "$HOME:/home/user"`.
-3. Run `scripts/sync-9router-cli-symlinks.sh` to create `/home/node` symlinks to `/home/user`.
-4. Verify symlinks with `ls -la`.
-5. Verify 9Router status with `/api/cli-tools/all-statuses`.
+3. If `docker ps` fails with permission denied, use `sudo docker` for Docker checks and run the sync script with `sudo bash`.
+4. Run `scripts/sync-9router-cli-symlinks.sh` to create `/home/node` symlinks to `/home/user`.
+5. Verify symlinks with `ls -la`.
+6. Verify 9Router status with `/api/cli-tools/all-statuses`.
 
 ## Script
 
@@ -30,10 +31,22 @@ Use the bundled script instead of hand-pasting long `docker exec` commands:
 bash /home/user/.codex/skills/9router-docker-cli-sync/scripts/sync-9router-cli-symlinks.sh
 ```
 
+If Docker requires sudo:
+
+```bash
+sudo bash /home/user/.codex/skills/9router-docker-cli-sync/scripts/sync-9router-cli-symlinks.sh
+```
+
 Optional container name:
 
 ```bash
 bash /home/user/.codex/skills/9router-docker-cli-sync/scripts/sync-9router-cli-symlinks.sh my-9router-container
+```
+
+With sudo and a custom container name:
+
+```bash
+sudo bash /home/user/.codex/skills/9router-docker-cli-sync/scripts/sync-9router-cli-symlinks.sh my-9router-container
 ```
 
 The script is idempotent. It removes only target paths under `/home/node` in the container, then recreates them as symlinks to `/home/user`.
@@ -81,7 +94,7 @@ Check these in order:
 1. Container must be started with `-v "$HOME:/home/user"`; otherwise symlinks point to missing targets.
 2. Host config must exist. Broken symlink is allowed, but 9Router marks installed only when expected file/folder exists or binary exists inside container.
 3. Dashboard may cache status. Hard refresh browser or restart container.
-4. If Docker command fails with permission denied, run from a normal terminal with sudo or fix Docker socket permissions.
+4. If Docker command fails with permission denied, run the sync script with `sudo bash` or fix Docker socket permissions.
 
 ## Security Note
 
