@@ -98,7 +98,25 @@ it actually changes:
 
 ## Quick Use
 
-Start 9Router with host home mounted:
+Prerequisites:
+
+- Check Docker works first:
+
+```bash
+docker --version
+docker ps
+```
+
+- If `docker ps` fails with a permission error, use `sudo docker` for the Docker commands below.
+
+Clone this repo and enter it:
+
+```bash
+git clone https://github.com/afu-it/9router-docker-cli-sync.git
+cd 9router-docker-cli-sync
+```
+
+Start 9Router with host home mounted. This mount is required; without it, the symlinks point to missing files:
 
 ```bash
 sudo docker stop 9router 2>/dev/null || true
@@ -112,16 +130,43 @@ sudo docker run -d \
   decolua/9router:latest
 ```
 
-Run sync:
+Confirm the required mount exists:
 
 ```bash
-bash scripts/sync-9router-cli-symlinks.sh
+sudo docker inspect 9router --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
+```
+
+Expected output must include:
+
+```text
+/home/your-user -> /home/user
+```
+
+Run sync. Use `sudo bash` if Docker requires sudo on your system:
+
+```bash
+bash scripts/sync-9router-cli-symlinks.sh 9router
+```
+
+Or:
+
+```bash
+sudo bash scripts/sync-9router-cli-symlinks.sh 9router
 ```
 
 Verify symlinks:
 
 ```bash
-docker exec 9router sh -lc 'ls -la /home/node/.codex /home/node/.claude /home/node/.config/opencode /home/node/.local/share/kilo'
+sudo docker exec 9router sh -lc 'ls -la /home/node/.codex /home/node/.claude /home/node/.config/opencode /home/node/.local/share/kilo'
+```
+
+Expected output should show symlinks like:
+
+```text
+/home/node/.codex -> /home/user/.codex
+/home/node/.claude -> /home/user/.claude
+/home/node/.config/opencode -> /home/user/.config/opencode
+/home/node/.local/share/kilo -> /home/user/.local/share/kilo
 ```
 
 Verify dashboard API:
@@ -135,6 +180,14 @@ Open dashboard:
 ```text
 http://127.0.0.1:20128/dashboard/cli-tools
 ```
+
+If the dashboard still shows old status, hard refresh the browser or restart the container:
+
+```bash
+sudo docker restart 9router
+```
+
+Tools only show as installed when their expected host config exists or the binary exists inside the container. For example, `jcode`, `openclaw`, and `deepseek-tui` will still show `not installed` if they are not installed on the host.
 
 ## Pass This Skill To Agents.ai / Codex Agents
 
