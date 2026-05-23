@@ -9,6 +9,15 @@ description: Repair 9Router Docker CLI tool detection by binding host home into 
 
 Make 9Router Docker read and write the host CLI configs, not copied container-only configs. This prevents fake dashboard state after switching from npm 9Router to Docker.
 
+## What This Fixes
+
+This skill handles two Docker migration issues:
+
+1. `/dashboard/providers` does not show old npm/host setup.
+   Fix: start Docker with `$HOME/.9router` mounted to `/app/data` and `DATA_DIR=/app/data`.
+2. `/dashboard/cli-tools` does not detect host CLI tools or connected setup.
+   Fix: start Docker with `$HOME` mounted to `/home/user`, then create `/home/node` symlinks to host config folders.
+
 ## Root Cause
 
 9Router CLI tool status routes use `os.homedir()`. In npm mode this is usually `/home/user`; in Docker it is `/home/node`. Detection checks `which <tool>` first, then falls back to specific config files under the container home. Host binaries and config files are invisible unless mounted or linked.

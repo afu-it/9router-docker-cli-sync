@@ -2,6 +2,26 @@
 
 Fix 9Router Docker `/dashboard/cli-tools` detection when tools installed on the host show as `not installed` inside the dashboard.
 
+## What This Fixes
+
+This repo handles two Docker migration issues:
+
+1. `/dashboard/providers` does not show old npm/host setup.
+   Fix: start Docker with the 9Router data directory mounted:
+
+   ```bash
+   -v "$HOME/.9router:/app/data"
+   -e DATA_DIR=/app/data
+   ```
+
+2. `/dashboard/cli-tools` does not detect host CLI tools or connected setup.
+   Fix: start Docker with host home mounted, then run the sync script to create `/home/node` symlinks to host config folders:
+
+   ```bash
+   -v "$HOME:/home/user"
+   bash scripts/sync-9router-cli-symlinks.sh 9router
+   ```
+
 ## Problem
 
 9Router works differently depending on how it is started:
